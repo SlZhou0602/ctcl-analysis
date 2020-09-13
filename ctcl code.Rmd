@@ -74,6 +74,7 @@ stage1 <- c(100*mytablex,0,100*NoTreatRate,100*TreatRate,100*TotalRate)
 
 0.2 descriptive research in stage 2
 ```{r}
+setwd("c:/Users/MI/Desktop/资料整合/2.研究生阶段/little task-ctcl")
 ctcl <- read.csv("newctcl.csv")
 ctcl <- subset(ctcl,ctcl$Response.compare.to.previous.F.U==0|ctcl$Response.compare.to.previous.F.U==1)
 ctcl <- subset(ctcl,ctcl$stage==2) # stage 2
