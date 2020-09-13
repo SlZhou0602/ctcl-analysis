@@ -1,0 +1,299 @@
+---
+title: "ctcl mf"
+author: "slzhou"
+date: "2019/11/13"
+output: html_document
+---
+Research objectives：研究ctcl疾病与不同特征指标之间的联系，是否可以依据不同特征来对不同病人采用不通风的治疗方式。（individual treatment）
+data sources: 北京某医院的ctcl患者数据
+code：之前编写过的部分code以及按本次作业要求修改了部分。
+outcome：0 病情加重；1 病情好转
+covariates：血生化指标等
+treatment：不同临床治疗方法
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd("c:/Users/MI/Desktop/资料整合/2.研究生阶段/little task-ctcl")
+ctcl <- read.csv("newctcl.csv")
+ctcl <- subset(ctcl,ctcl$Response.compare.to.previous.F.U==0|ctcl$Response.compare.to.previous.F.U==1)# take a look of Response.compare.to.previous.F.U is not NA.
+library("reshape2")
+```
+
+0.descriptive research——各个药物的缓解率
+```{r}
+mytablex <- 1:10
+num <- 1:11
+for (i in 1:10) {
+  mytable <- xtabs(~ctcl$Response.compare.to.previous.F.U+ctcl[,9+i],data=ctcl)
+  num[i] <- mytable[3]+mytable[4]
+  mytable1 <- ftable(prop.table(mytable,2))
+  mytablex[i] <- mytable1[2,2]
+  print(colnames(ctcl[i+9]))
+  print(mytable)
+}
+mytablex
+mydata <- subset(ctcl,ctcl[,10]+ctcl[,11]+ctcl[,12]+ctcl[,13]+ctcl[,14]+ctcl[,15]+ctcl[,16]+ctcl[,17]+ctcl[,18]+ctcl[,19]+ctcl[,20]+ctcl[,21]+ctcl[,22]+ctcl[,23]+ctcl[,24]+ctcl[,25]+ctcl[,26]+ctcl[,27]==0)
+NoTreatRate <- sum(mydata$Response.compare.to.previous.F.U)/nrow(mydata);NoTreatRate
+TreatRate <- (sum(ctcl$Response.compare.to.previous.F.U)-sum(mydata$Response.compare.to.previous.F.U))/(nrow(ctcl)-nrow(mydata));TreatRate
+TotalRate <- sum(ctcl$Response.compare.to.previous.F.U)/nrow(ctcl);TotalRate
+mytabley <- c(100*mytablex,100*NoTreatRate,100*TreatRate,100*TotalRate)
+barplot(mytabley,names.arg = c(colnames(ctcl[10:19]),"NoTreat","Treat","Total"),cex.names = 0.5,main = "improvement rate in different treatments",beside = TRUE)
+num[11] <- nrow(mydata)
+barplot(num,names.arg = c(colnames(ctcl[10:19]),"NoTreat"),cex.names = 0.7,main = "the number of people in different treatments",beside = TRUE)
+```
+
+add treatment kinds
+
+0.1 descriptive research in stage 1
+```{r}
+ctcl <- subset(ctcl,ctcl$stage==1) # stage 1
+mytablex <- 1:9
+num <- 1:10
+for (i in 1:9) {
+  mytable <- xtabs(~ctcl$Response.compare.to.previous.F.U+ctcl[,9+i],data=ctcl)
+  num[i] <- mytable[3]+mytable[4]
+  mytable1 <- ftable(prop.table(mytable,2))
+  mytablex[i] <- mytable1[2,2]
+  print(colnames(ctcl[i+9]))
+  print(mytable)
+}
+mytablex
+mydata <- subset(ctcl,ctcl[,10]+ctcl[,11]+ctcl[,12]+ctcl[,13]+ctcl[,14]+ctcl[,15]+ctcl[,16]+ctcl[,17]+ctcl[,18]+ctcl[,19]+ctcl[,20]+ctcl[,21]+ctcl[,22]+ctcl[,23]+ctcl[,24]+ctcl[,25]+ctcl[,26]+ctcl[,27]==0)
+NoTreatRate <- sum(mydata$Response.compare.to.previous.F.U)/nrow(mydata);NoTreatRate
+TreatRate <- (sum(ctcl$Response.compare.to.previous.F.U)-sum(mydata$Response.compare.to.previous.F.U))/(nrow(ctcl)-nrow(mydata));TreatRate
+TotalRate <- sum(ctcl$Response.compare.to.previous.F.U)/nrow(ctcl);TotalRate
+mytabley <- c(100*mytablex,100*NoTreatRate,100*TreatRate,100*TotalRate)
+barplot(mytabley,names.arg = c(colnames(ctcl[10:18]),"NoTreat","Treat","Total"),cex.names = 0.5,main = "improvement rate in different treatments",beside = TRUE)
+num[10] <- nrow(mydata)
+barplot(num,names.arg = c(colnames(ctcl[10:18]),"NoTreat"),cex.names = 0.7,main = "the number of people in different treatments",beside = TRUE)
+stage1 <- c(100*mytablex,0,100*NoTreatRate,100*TreatRate,100*TotalRate)
+```
+
+0.2 descriptive research in stage 2
+```{r}
+ctcl <- read.csv("newctcl.csv")
+ctcl <- subset(ctcl,ctcl$Response.compare.to.previous.F.U==0|ctcl$Response.compare.to.previous.F.U==1)
+ctcl <- subset(ctcl,ctcl$stage==2) # stage 2
+mytablex <- 1:10
+num <- 1:11
+for (i in 1:10) {
+  mytable <- xtabs(~ctcl$Response.compare.to.previous.F.U+ctcl[,9+i],data=ctcl)
+  num[i] <- mytable[3]+mytable[4]
+  mytable1 <- ftable(prop.table(mytable,2))
+  mytablex[i] <- mytable1[2,2]
+  print(colnames(ctcl[i+9]))
+  print(mytable)
+}
+mytablex
+mydata <- subset(ctcl,ctcl[,10]+ctcl[,11]+ctcl[,12]+ctcl[,13]+ctcl[,14]+ctcl[,15]+ctcl[,16]+ctcl[,17]+ctcl[,18]+ctcl[,19]+ctcl[,20]+ctcl[,21]+ctcl[,22]+ctcl[,23]+ctcl[,24]+ctcl[,25]+ctcl[,26]+ctcl[,27]==0)
+NoTreatRate <- sum(mydata$Response.compare.to.previous.F.U)/nrow(mydata);NoTreatRate
+TreatRate <- (sum(ctcl$Response.compare.to.previous.F.U)-sum(mydata$Response.compare.to.previous.F.U))/(nrow(ctcl)-nrow(mydata));TreatRate
+TotalRate <- sum(ctcl$Response.compare.to.previous.F.U)/nrow(ctcl);TotalRate
+mytabley <- c(100*mytablex,100*NoTreatRate,100*TreatRate,100*TotalRate)
+barplot(mytabley,names.arg = c(colnames(ctcl[10:19]),"NoTreat","Treat","Total"),cex.names = 0.5,main = "improvement rate in different treatments",beside = TRUE)
+num[11] <- nrow(mydata)
+barplot(num,names.arg = c(colnames(ctcl[10:19]),"NoTreat"),cex.names = 0.7,main = "the number of people in different treatments",beside = TRUE)
+stage2 <- c(100*mytablex,100*NoTreatRate,100*TreatRate,100*TotalRate)
+treatment <- c(colnames(ctcl[10:19]),"NoTreat","Treat","Total")
+stageframe <- matrix(c(stage1,stage2),nrow = 13,dimnames = list(treatment,c("stage1","stage2")))
+stageframe <- t(stageframe);stageframe
+stageframe <- stageframe[,c(1:7,11:13)]
+```
+
+0.3.merge pic
+```{r}
+#barplot(stageframe, main = "improvement rate in different treatments and different stages",xlab = "treatment",ylab = "improvement rate",col = c("red","yellow"),cex.names = 0.53, beside=TRUE, legend.text = c('stage1','stage2'),args.legend=c(x=33,y=-15))
+barplot(stageframe, xlab = "treatment",ylab = "improvement rate",col = c("red","yellow"),cex.names = 0.531, beside=TRUE, legend.text = c('stage1','stage2'),args.legend=c(x=33,y=-15))
+```
+
+add different treatment kinds people
+
+1.1 
+```{r}
+ctcl <- read.csv("newctcl.csv")
+ctcl <- subset(ctcl,ctcl$Response.compare.to.previous.F.U==0|ctcl$Response.compare.to.previous.F.U==1)
+ctclstage1 <- subset(ctcl,ctcl$stage==1)
+newdata <- ctclstage1[c(-8:-9)]
+library("VIM")
+aggr(newdata)
+```
+
+```{r}
+for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  fit<- glm(Response.compare.to.previous.F.U ~ LY.,data = data,family = binomial)
+  print(summary(fit))
+}
+```
+
+手动删除缺失最多的若干个
+
+```{r}
+library('MASS')
+for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  data <- data[,c(7,26:34)]
+  data <- na.omit(data)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST,data = data,family = binomial)
+  fit <- stepAIC(fit.full,direction = 'both', trace = 0)
+  print(summary(fit))
+}
+mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
+  data <- mydata[,c(7,26:34)]
+  data <- na.omit(data)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST,data = data,family = binomial)
+  fit <- stepAIC(fit.full,direction = 'both', trace = 0)
+  print(summary(fit))
+```
+
+```{r}
+library('MASS')
+for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  data <- data[,c(7,26,29,30)]
+  data <- na.omit(data)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.,data = data,family = binomial)
+  print(summary(fit.full))
+}
+mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
+  mydata <- mydata[,c(7,26,29,30)]
+  mydata <- na.omit(mydata)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ mydata$WBC.,data = mydata,family = binomial)
+  print(summary(fit.full))
+```
+
+```{r}
+library('MASS')
+for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  data <- data[,c(7,26,29,30)]
+  data <- na.omit(data)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ data$LY.,data = data,family = binomial)
+  fit <- stepAIC(fit.full,direction = 'both', trace = 0)
+  print(summary(fit))
+}
+mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
+  mydata <- mydata[,c(7,26,29,30)]
+  mydata <- na.omit(mydata)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ mydata$LY.,data = mydata,family = binomial)
+  print(summary(fit.full))
+```
+result: take wbc, ne,ly into account
+
+```{r}
+library("ggplot2")
+pic1 <- ggplot()+geom_point(data=subset(newdata,newdata[,8]==1),aes(x=subset(newdata,newdata[,8]==1)$WBC,y=subset(newdata,newdata[,8]==1)$Response.compare.to.previous.F.U,color="red"))+geom_smooth(data=subset(newdata,newdata[,8]==1),aes(x=subset(newdata,newdata[,8]==1)$WBC,y=subset(newdata,newdata[,8]==1)$Response.compare.to.previous.F.U,color="red"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,9]==1),aes(x=subset(newdata,newdata[,9]==1)$WBC,y=subset(newdata,newdata[,9]==1)$Response.compare.to.previous.F.U,color="blue"))+geom_smooth(data=subset(newdata,newdata[,9]==1),aes(x=subset(newdata,newdata[,9]==1)$WBC,y=subset(newdata,newdata[,9]==1)$Response.compare.to.previous.F.U,color="blue"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,10]==1),aes(x=subset(newdata,newdata[,10]==1)$WBC,y=subset(newdata,newdata[,10]==1)$Response.compare.to.previous.F.U,color="black"))+geom_smooth(data=subset(newdata,newdata[,10]==1),aes(x=subset(newdata,newdata[,10]==1)$WBC,y=subset(newdata,newdata[,10]==1)$Response.compare.to.previous.F.U,color="black"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,12]==1),aes(x=subset(newdata,newdata[,12]==1)$WBC,y=subset(newdata,newdata[,12]==1)$Response.compare.to.previous.F.U,color="grey"))+geom_smooth(data=subset(newdata,newdata[,12]==1),aes(x=subset(newdata,newdata[,12]==1)$WBC,y=subset(newdata,newdata[,12]==1)$Response.compare.to.previous.F.U,color="grey"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,13]==1),aes(x=subset(newdata,newdata[,13]==1)$WBC,y=subset(newdata,newdata[,13]==1)$Response.compare.to.previous.F.U,color="purple"))+geom_smooth(data=subset(newdata,newdata[,13]==1),aes(x=subset(newdata,newdata[,13]==1)$WBC,y=subset(newdata,newdata[,13]==1)$Response.compare.to.previous.F.U,color="purple"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,14]==1),aes(x=subset(newdata,newdata[,14]==1)$WBC,y=subset(newdata,newdata[,14]==1)$Response.compare.to.previous.F.U,color="yellow"))+geom_smooth(data=subset(newdata,newdata[,14]==1),aes(x=subset(newdata,newdata[,14]==1)$WBC,y=subset(newdata,newdata[,14]==1)$Response.compare.to.previous.F.U,color="yellow"),method="glm",method.args = list(family = "binomial"), se = FALSE)+labs(x="WBC",y="improvement rate")#标题居中
+pic1+scale_color_manual(name = "treatment",values = c('red' = 'red', "blue" = 'blue',"black" = 'black',"grey" = 'grey',"purple" = 'purple',"yellow" = 'yellow'),breaks = c("red", "blue", "black", "grey", "purple","yellow"),labels = c("NB.UVB", "IFN.a.2b","MTX","Topical Steroid","Prednisone","CTX"))
+newdata <- subset(newdata,newdata$LY.<100) #delete abnormal value.
+pic1 <- ggplot()+geom_point(data=subset(newdata,newdata[,8]==1),aes(x=subset(newdata,newdata[,8]==1)$LY.,y=subset(newdata,newdata[,8]==1)$Response.compare.to.previous.F.U,color="red"))+geom_smooth(data=subset(newdata,newdata[,8]==1),aes(x=subset(newdata,newdata[,8]==1)$LY.,y=subset(newdata,newdata[,8]==1)$Response.compare.to.previous.F.U,color="red"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,9]==1),aes(x=subset(newdata,newdata[,9]==1)$LY.,y=subset(newdata,newdata[,9]==1)$Response.compare.to.previous.F.U,color="blue"))+geom_smooth(data=subset(newdata,newdata[,9]==1),aes(x=subset(newdata,newdata[,9]==1)$LY.,y=subset(newdata,newdata[,9]==1)$Response.compare.to.previous.F.U,color="blue"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,10]==1),aes(x=subset(newdata,newdata[,10]==1)$LY.,y=subset(newdata,newdata[,10]==1)$Response.compare.to.previous.F.U,color="black"))+geom_smooth(data=subset(newdata,newdata[,10]==1),aes(x=subset(newdata,newdata[,10]==1)$LY.,y=subset(newdata,newdata[,10]==1)$Response.compare.to.previous.F.U,color="black"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,11]==1),aes(x=subset(newdata,newdata[,11]==1)$LY.,y=subset(newdata,newdata[,11]==1)$Response.compare.to.previous.F.U,color="green"))+geom_smooth(data=subset(newdata,newdata[,11]==1),aes(x=subset(newdata,newdata[,11]==1)$LY.,y=subset(newdata,newdata[,11]==1)$Response.compare.to.previous.F.U,color="green"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,12]==1),aes(x=subset(newdata,newdata[,12]==1)$LY.,y=subset(newdata,newdata[,12]==1)$Response.compare.to.previous.F.U,color="grey"))+geom_smooth(data=subset(newdata,newdata[,12]==1),aes(x=subset(newdata,newdata[,12]==1)$LY.,y=subset(newdata,newdata[,12]==1)$Response.compare.to.previous.F.U,color="grey"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,13]==1),aes(x=subset(newdata,newdata[,13]==1)$LY.,y=subset(newdata,newdata[,13]==1)$Response.compare.to.previous.F.U,color="purple"))+geom_smooth(data=subset(newdata,newdata[,13]==1),aes(x=subset(newdata,newdata[,13]==1)$LY.,y=subset(newdata,newdata[,13]==1)$Response.compare.to.previous.F.U,color="purple"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,14]==1),aes(x=subset(newdata,newdata[,14]==1)$LY.,y=subset(newdata,newdata[,14]==1)$Response.compare.to.previous.F.U,color="yellow"))+geom_smooth(data=subset(newdata,newdata[,14]==1),aes(x=subset(newdata,newdata[,14]==1)$LY.,y=subset(newdata,newdata[,14]==1)$Response.compare.to.previous.F.U,color="yellow"),method="glm",method.args = list(family = "binomial"), se = FALSE)+labs(x="LY.",y="improvement rate")#标题居中
+pic1+scale_color_manual(name = "treatment",values = c('red' = 'red', "blue" = 'blue',"black" = 'black',"green"="green","grey" = 'grey',"purple" = 'purple',"yellow" = 'yellow'),breaks = c("red", "blue", "black","green", "grey", "purple","yellow"),labels = c("NB.UVB", "IFN.a.2b","MTX",'acitretin
+',"Topical Steroid","Prednisone","CTX"))
+newdata <- ctclstage1[c(-8:-9)]
+```
+
+1.2
+```{r}
+ctclstage2 <- subset(ctcl,ctcl$stage==2)
+newdata <- ctclstage2[c(-8:-9)]
+library("VIM")
+aggr(newdata)
+```
+
+```{r}
+for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  data <- data[,c(7,26:37)]
+  data <- na.omit(data)
+  fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST+data$CREA,data = data,family = binomial)
+  fit <- stepAIC(fit.full,direction = 'both',trace = 0)
+  print(summary(fit))
+}
+mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
+a <- glm(Response.compare.to.previous.F.U ~ CREA,data = mydata,family = binomial)
+summary(a)
+```
+
+```{r}
+# total dataset
+for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  fit.full<- glm(Response.compare.to.previous.F.U ~ data$CREA,data = data,family = binomial)
+  print(summary(fit.full))
+}
+mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
+a <- glm(Response.compare.to.previous.F.U ~ CREA,data = mydata,family = binomial)
+summary(a)
+#train test split
+
+```
+
+
+result: CREA, HGB, AST, ALT, MO. and so on.
+
+```{r}
+pic2 <- ggplot()+geom_point(data=subset(newdata,newdata[,8]==1),aes(x=subset(newdata,newdata[,8]==1)$CREA,y=subset(newdata,newdata[,8]==1)$Response.compare.to.previous.F.U,color="red"))+geom_smooth(data=subset(newdata,newdata[,8]==1),aes(x=subset(newdata,newdata[,8]==1)$CREA,y=subset(newdata,newdata[,8]==1)$Response.compare.to.previous.F.U,color="red"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,9]==1),aes(x=subset(newdata,newdata[,9]==1)$CREA,y=subset(newdata,newdata[,9]==1)$Response.compare.to.previous.F.U,color="blue"))+geom_smooth(data=subset(newdata,newdata[,9]==1),aes(x=subset(newdata,newdata[,9]==1)$CREA,y=subset(newdata,newdata[,9]==1)$Response.compare.to.previous.F.U,color="blue"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,10]==1),aes(x=subset(newdata,newdata[,10]==1)$CREA,y=subset(newdata,newdata[,10]==1)$Response.compare.to.previous.F.U,color="black"))+geom_smooth(data=subset(newdata,newdata[,10]==1),aes(x=subset(newdata,newdata[,10]==1)$CREA,y=subset(newdata,newdata[,10]==1)$Response.compare.to.previous.F.U,color="black"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,11]==1),aes(x=subset(newdata,newdata[,11]==1)$CREA,y=subset(newdata,newdata[,11]==1)$Response.compare.to.previous.F.U,color="grey"))+geom_smooth(data=subset(newdata,newdata[,11]==1),aes(x=subset(newdata,newdata[,11]==1)$CREA,y=subset(newdata,newdata[,11]==1)$Response.compare.to.previous.F.U,color="grey"),method="glm",method.args = list(family = "binomial"), se = FALSE)+geom_point(data=subset(newdata,newdata[,13]==1),aes(x=subset(newdata,newdata[,13]==1)$CREA,y=subset(newdata,newdata[,13]==1)$Response.compare.to.previous.F.U,color="purple"))+geom_smooth(data=subset(newdata,newdata[,13]==1),aes(x=subset(newdata,newdata[,13]==1)$CREA,y=subset(newdata,newdata[,13]==1)$Response.compare.to.previous.F.U,color="purple"),method="glm",method.args = list(family = "binomial"), se = FALSE)+labs(x="CREA",y="improvement rate")#标题居中
+pic2+scale_color_manual(name = "treatment",values = c('red' = 'red', "blue" = 'blue',"black" = 'black',"grey" = 'grey',"purple" = 'purple'),breaks = c("red", "blue", "black", "grey", "purple"),labels = c("NB.UVB", "IFN.a.2b","MTX","acitretin","Prednisone"))
+```
+
+2.0 treatment effect and interaction effect
+```{r}
+fit <- glm(Response.compare.to.previous.F.U ~ gender+age+stage+NB.UVB+IFN.a.2b+MTX+acitretin+Topical.Steroid+Prednisone+CTX+Nitrogen.Mustard+HDAC.Inhibitor+Hydroxychloroquine+bjyao,data = ctcl,family = binomial);summary(fit)
+fit <- glm(Response.compare.to.previous.F.U ~ gender+age+stage+NB.UVB+IFN.a.2b+MTX+acitretin+Topical.Steroid+Prednisone+CTX+Nitrogen.Mustard+HDAC.Inhibitor+Hydroxychloroquine+bjyao,data = ctcl,family = binomial)
+car::vif(fit)
+```
+
+```{r}
+fit.full <- glm(Response.compare.to.previous.F.U ~gender+age+stage+NB.UVB+IFN.a.2b+MTX+acitretin+Prednisone+CTX+bjyao                   +gender*NB.UVB+gender*IFN.a.2b+gender*MTX+gender*acitretin+gender*Prednisone+gender*CTX+gender*bjyao      +age*NB.UVB+age*IFN.a.2b+age*MTX+age*acitretin+age*Prednisone+age*CTX+age*bjyao  +stage*NB.UVB+stage*IFN.a.2b+stage*MTX+stage*acitretin+stage*Prednisone+stage*CTX+stage*bjyao                 +NB.UVB*IFN.a.2b+NB.UVB*MTX+NB.UVB*acitretin+NB.UVB*Prednisone+NB.UVB*CTX+NB.UVB*bjyao                        +IFN.a.2b*MTX+IFN.a.2b*acitretin+IFN.a.2b*Prednisone+IFN.a.2b*CTX+IFN.a.2b*bjyao                              +MTX*acitretin+MTX*Prednisone+MTX*CTX+MTX*bjyao                                                               +acitretin*Prednisone+acitretin*CTX+acitretin*bjyao                                                           +Prednisone*CTX+Prednisone*bjyao                                                                              +bjyao*CTX,data = ctcl,family = binomial);summary(fit.full)
+
+fit1 <- stepAIC(fit.full, direction='both')
+#summary(fit1)
+#fit <- glm(Response.compare.to.previous.F.U ~ age+gender+                                                                          stage*NB.UVB+stage*MTX+stage*Prednisone+stage*CTX                                                             +NB.UVB*acitretin                                                                                             +IFN.a.2b*Prednisone                                                                                          +MTX*acitretin                                                                                                +acitretin*Prednisone+acitretin*CTX,data = ctcl,family = binomial);summary(fit)
+#这里对变量选择后的model做了一下筛选
+fit <- glm(Response.compare.to.previous.F.U ~ gender+age+stage+NB.UVB+IFN.a.2b+MTX+acitretin+Prednisone+CTX  +gender:MTX+age:MTX+age:acitretin+age:Prednisone                                                            +stage:NB.UVB+stage:MTX+stage:Prednisone+stage:CTX                                                    +NB.UVB:acitretin+MTX:acitretin+acitretin:Prednisone+acitretin:CTX,data = ctcl,family = binomial);summary(fit)
+fit2 <- stepAIC(fit, direction='both')
+```
+
+
+```{r}
+summary(fit1)
+summary(fit2)
+```
+
+```{r}
+library(ResourceSelection)
+hoslem.test(fit2$y, fitted(fit2), g=10)
+car::influencePlot(fit2)
+```
+
+2.1 treatment interaction in stage 1
+```{r}
+fit <- glm(Response.compare.to.previous.F.U ~ gender+age+NB.UVB+IFN.a.2b+MTX+acitretin+Topical.Steroid+Prednisone+CTX+bjyao,data = ctclstage1,family = binomial);summary(fit)
+fit.full1 <- glm(Response.compare.to.previous.F.U ~ gender+age+NB.UVB+IFN.a.2b+MTX+acitretin+Prednisone+CTX+bjyao   +gender*NB.UVB+gender*IFN.a.2b+gender*MTX+gender*acitretin+gender*Prednisone+gender*CTX+gender*bjyao      +age*NB.UVB+age*IFN.a.2b+age*MTX+age*acitretin+age*Prednisone+age*CTX+age*bjyao               +NB.UVB*IFN.a.2b+NB.UVB*MTX+NB.UVB*acitretin+NB.UVB*Prednisone+NB.UVB*CTX+NB.UVB*bjyao                        +IFN.a.2b*MTX+IFN.a.2b*acitretin+IFN.a.2b*Prednisone+IFN.a.2b*CTX+IFN.a.2b*bjyao                              +MTX*acitretin+MTX*Prednisone+MTX*CTX+MTX*bjyao                                                               +acitretin*Prednisone+acitretin*CTX+acitretin*bjyao                                                           +Prednisone*CTX+Prednisone*bjyao                                                                              +bjyao*CTX,data = ctclstage1,family = binomial);summary(fit)
+fit3 <- stepAIC(fit.full1, direction='both')
+
+fit4 <- glm(Response.compare.to.previous.F.U ~ gender + age + NB.UVB + IFN.a.2b + MTX + acitretin + Prednisone + CTX + bjyao + gender:CTX + age:MTX + age:Prednisone + NB.UVB:IFN.a.2b,data = ctclstage1,family = binomial);summary(fit4)
+fit4 <- stepAIC(fit4, direction='both')
+```
+
+```{r}
+summary(fit3)
+summary(fit4)
+```
+
+
+2.2 treatment interaction in stage 2
+```{r}
+fit <- glm(Response.compare.to.previous.F.U ~ gender+age+NB.UVB+IFN.a.2b+MTX+acitretin+Topical.Steroid+Prednisone+CTX+bjyao,data = ctclstage2,family = binomial);summary(fit)
+fit.full2 <- glm(Response.compare.to.previous.F.U ~ gender+age+NB.UVB+IFN.a.2b+MTX+acitretin+Prednisone+CTX+bjyao   +gender*NB.UVB+gender*IFN.a.2b+gender*MTX+gender*acitretin+gender*Prednisone+gender*CTX+gender*bjyao      +age*NB.UVB+age*IFN.a.2b+age*MTX+age*acitretin+age*Prednisone+age*CTX+age*bjyao               +NB.UVB*IFN.a.2b+NB.UVB*MTX+NB.UVB*acitretin+NB.UVB*Prednisone+NB.UVB*CTX+NB.UVB*bjyao                        +IFN.a.2b*MTX+IFN.a.2b*acitretin+IFN.a.2b*Prednisone+IFN.a.2b*CTX+IFN.a.2b*bjyao                              +MTX*acitretin+MTX*Prednisone+MTX*CTX+MTX*bjyao                                                               +acitretin*Prednisone+acitretin*CTX+acitretin*bjyao                                                           +Prednisone*CTX+Prednisone*bjyao                                                                              +bjyao*CTX,data = ctclstage2,family = binomial);summary(fit)
+fit5 <- stepAIC(fit.full2, direction='both')
+summary(fit5)
+
+
+fit6 <- glm(Response.compare.to.previous.F.U ~ gender + age + NB.UVB + IFN.a.2b + MTX + acitretin + Prednisone + CTX + bjyao + gender:NB.UVB + gender:Prednisone + gender:bjyao + age:IFN.a.2b + age:MTX + age:Prednisone + NB.UVB:acitretin + MTX:bjyao + acitretin:Prednisone + acitretin:CTX + Prednisone:CTX + Prednisone:bjyao,data = ctclstage2,family = binomial);summary(fit)
+fit6 <- stepAIC(fit6, direction='both')
+summary(fit6)
+
+```
