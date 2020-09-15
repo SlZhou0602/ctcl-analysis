@@ -114,6 +114,7 @@ add different treatment kinds people
 
 1.1 
 ```{r}
+setwd("c:/Users/MI/Desktop/资料整合/2.研究生阶段/little task-ctcl")
 ctcl <- read.csv("newctcl.csv")
 ctcl <- subset(ctcl,ctcl$Response.compare.to.previous.F.U==0|ctcl$Response.compare.to.previous.F.U==1)
 ctclstage1 <- subset(ctcl,ctcl$stage==1)
@@ -134,31 +135,91 @@ for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
 
 ```{r}
 library('MASS')
-for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
-  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+library('caret')
+library('xlsx')
+set.seed(13)
+trainIndex <- createDataPartition(1:nrow(newdata),p=0.80,list=FALSE)
+testIndex <- setdiff(1:nrow(newdata),trainIndex)
+#train test split
+datatrain <- newdata[trainIndex,]
+datatest <- newdata[-trainIndex,]
+df <- data.frame(testIndex,model_1=1:nrow(datatest),model_2=1:nrow(datatest),model_3=1:nrow(datatest),model_4=1:nrow(datatest))
+for (i in 1:4 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(datatrain,datatrain[,i+7]==1) # Return subsets of vectors, matrices or data frames
   data <- data[,c(7,26:34)]
   data <- na.omit(data)
   fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST,data = data,family = binomial)
   fit <- stepAIC(fit.full,direction = 'both', trace = 0)
   print(summary(fit))
+  data <- datatest
+  df[,i+1] <- predict.glm(fit,data,type = "response")
 }
+df <- df[,c(-1,-5)] #delete the column 5 because of the bad fit
+df <- data.frame(df,datatest[,c(7:10)],suggestion=c(rep(0,nrow(datatest))))
+#df <- as.matrix(df)
+#df <- df[-which(apply(df,1,function(x)all(is.na(x)))),]
+#d <- data.frame()
+for (i in 1:nrow(df)){
+  title=c(1,2,3)
+  a <- df[i,which.max(df[i,1:3])]
+	flg=c(
+	  try(which(df[i,]==a),FALSE)
+	)
+	df$suggestion[i] <- title[flg]
+}
+d <- df[,4:8]
+
+#write.xlsx(df,file = 'C:/Users/MI/Desktop/d2.xlsx')
+
+#以下部分未改动，实际上，newdata应该改为datatrain
 mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
-  data <- mydata[,c(7,26:34)]
-  data <- na.omit(data)
-  fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST,data = data,family = binomial)
-  fit <- stepAIC(fit.full,direction = 'both', trace = 0)
-  print(summary(fit))
+data <- mydata[,c(7,26:34)]
+data <- na.omit(data)
+fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST,data = data,family = binomial)
+fit <- stepAIC(fit.full,direction = 'both', trace = 0)
+print(summary(fit))
 ```
 
+WBC:all the patients are suggested to get the nbuvb...
 ```{r}
 library('MASS')
+library('caret')
+library('xlsx')
+set.seed(15)
+trainIndex <- createDataPartition(1:nrow(newdata),p=0.75,list=FALSE)
+testIndex <- setdiff(1:nrow(newdata),trainIndex)
+#train test split
+datatrain <- newdata[trainIndex,]
+datatest <- newdata[-trainIndex,]
+df <- data.frame(testIndex,model_1=1:nrow(datatest),model_2=1:nrow(datatest),model_3=1:nrow(datatest),model_4=1:nrow(datatest),model_5=1:nrow(datatest),model_6=1:nrow(datatest),model_7=1:nrow(datatest))
 for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
-  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  data <- subset(datatrain,datatrain[,i+7]==1) # Return subsets of vectors, matrices or data frames
   data <- data[,c(7,26,29,30)]
   data <- na.omit(data)
-  fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.,data = data,family = binomial)
-  print(summary(fit.full))
+  fit<- glm(Response.compare.to.previous.F.U ~ data$WBC.,data = data,family = binomial)
+  print(summary(fit))
+  data <- datatest
+  df[,i+1] <- predict.glm(fit,data,type = "response")
 }
+df <- df[,c(-1,-4:-6,-8)] #delete the column 5 because of the bad fit
+df <- data.frame(df,datatest[,c(7:9,13)],suggestion=c(rep(0,nrow(datatest))))
+#df <- as.matrix(df)
+#df <- df[-which(apply(df,1,function(x)all(is.na(x)))),]
+#d <- data.frame()
+for (i in 1:nrow(df)){
+  title=c(1,2,6)
+  a <- df[i,which.max(df[i,1:3])]
+	flg=c(
+	  try(which(df[i,]==a),FALSE)
+	)
+	df$suggestion[i] <- title[flg]
+}
+#d <- df[,4:8]
+
+#write.xlsx(df,file = 'C:/Users/MI/Desktop/d2.xlsx')
+
+
+
 mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
   mydata <- mydata[,c(7,26,29,30)]
   mydata <- na.omit(mydata)
@@ -166,16 +227,44 @@ mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newda
   print(summary(fit.full))
 ```
 
+LY
 ```{r}
 library('MASS')
+set.seed(15)
+trainIndex <- createDataPartition(1:nrow(newdata),p=0.75,list=FALSE)
+testIndex <- setdiff(1:nrow(newdata),trainIndex)
+#train test split
+datatrain <- newdata[trainIndex,]
+datatest <- newdata[-trainIndex,]
+df <- data.frame(testIndex,model_1=1:nrow(datatest),model_2=1:nrow(datatest),model_3=1:nrow(datatest),model_4=1:nrow(datatest),model_5=1:nrow(datatest),model_6=1:nrow(datatest),model_7=1:nrow(datatest))
 for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
-  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+  data <- subset(datatrain,datatrain[,i+7]==1) # Return subsets of vectors, matrices or data frames
   data <- data[,c(7,26,29,30)]
   data <- na.omit(data)
-  fit.full<- glm(Response.compare.to.previous.F.U ~ data$LY.,data = data,family = binomial)
-  fit <- stepAIC(fit.full,direction = 'both', trace = 0)
+  fit<- glm(Response.compare.to.previous.F.U ~ data$LY.,data = data,family = binomial)
   print(summary(fit))
+  data <- datatest
+  df[,i+1] <- predict.glm(fit,data,type = "response")
 }
+df <- df[,c(-1,-5:-8)] #delete the column 5 because of the bad fit
+df <- data.frame(df,datatest[,c(7:10)],suggestion=c(rep(0,nrow(datatest))))
+#df <- as.matrix(df)
+#df <- df[-which(apply(df,1,function(x)all(is.na(x)))),]
+#d <- data.frame()
+for (i in 1:nrow(df)){
+  title=c(1,2,3)
+  a <- df[i,which.max(df[i,1:3])]
+	flg=c(
+	  try(which(df[i,]==a),FALSE)
+	)
+	df$suggestion[i] <- title[flg]
+}
+d <- df[,4:8]
+
+write.xlsx(d,file = 'C:/Users/MI/Desktop/d41.xlsx')
+
+
+
 mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
   mydata <- mydata[,c(7,26,29,30)]
   mydata <- na.omit(mydata)
@@ -204,26 +293,88 @@ aggr(newdata)
 ```
 
 ```{r}
-for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
-  data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
+library('caret')
+library('xlsx')
+set.seed(14)
+trainIndex <- createDataPartition(1:nrow(newdata),p=0.80,list=FALSE)
+testIndex <- setdiff(1:nrow(newdata),trainIndex)
+#train test split
+datatrain <- newdata[trainIndex,]
+datatest <- newdata[-trainIndex,]
+df <- data.frame(testIndex,model_1=1:nrow(datatest),model_2=1:nrow(datatest),model_3=1:nrow(datatest),model_4=1:nrow(datatest)) #初始化
+for (i in 2:4 ) { # analysis a treatment one time,and make a plot.
+  data <- subset(datatrain,datatrain[,i+7]==1) # Return subsets of vectors, matrices or data frames
   data <- data[,c(7,26:37)]
   data <- na.omit(data)
   fit.full<- glm(Response.compare.to.previous.F.U ~ data$WBC.+data$HGB+data$PLT+data$NE.+data$LY.+data$EO.+data$MO.+data$ALT+data$AST+data$CREA,data = data,family = binomial)
   fit <- stepAIC(fit.full,direction = 'both',trace = 0)
-  print(summary(fit))
+  #print(summary(fit))
+  data <- datatest
+  df[,i] <- predict.glm(fit,data,type = "response")
 }
+df <- df[,c(-1,-5)] #delete the column 5 because of the bad fit
+df <- data.frame(df,datatest[,c(7,9:11)],suggestion=c(rep(0,nrow(datatest))))
+#df <- as.matrix(df)
+#df <- df[-which(apply(df,1,function(x)all(is.na(x)))),]
+#d <- data.frame()
+for (i in 1:nrow(df)){
+  title=c(1,2,3)
+  a <- df[i,which.max(df[i,1:3])]
+	flg=c(
+	  try(which(df[i,]==a),FALSE)
+	)
+	df$suggestion[i] <- title[flg]
+}
+d <- df[,4:8]
+
+write.xlsx(df,file = 'C:/Users/MI/Desktop/d22.xlsx')
+
+
+#
 mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
 a <- glm(Response.compare.to.previous.F.U ~ CREA,data = mydata,family = binomial)
 summary(a)
 ```
 
+
+CREA: almost nbuvb.....
 ```{r}
 # total dataset
+library('caret')
+library('xlsx')
+set.seed(14)
+trainIndex <- createDataPartition(1:nrow(newdata),p=0.70,list=FALSE)
+testIndex <- setdiff(1:nrow(newdata),trainIndex)
+#train test split
+datatrain <- newdata[trainIndex,]
+datatest <- newdata[-trainIndex,]
+df <- data.frame(testIndex,model_1=1:nrow(datatest),model_2=1:nrow(datatest),model_3=1:nrow(datatest),model_4=1:nrow(datatest),model_5=1:nrow(datatest),model_6=1:nrow(datatest),model_7=1:nrow(datatest)) #初始化
 for (i in 1:7 ) { # analysis a treatment one time,and make a plot.
   data <- subset(newdata,newdata[,i+7]==1) # Return subsets of vectors, matrices or data frames
-  fit.full<- glm(Response.compare.to.previous.F.U ~ data$CREA,data = data,family = binomial)
-  print(summary(fit.full))
+  fit<- glm(Response.compare.to.previous.F.U ~ data$CREA,data = data,family = binomial)
+  print(summary(fit))
+  data <- datatest
+  df[,i+1] <- predict.glm(fit,data,type = "response")
 }
+df <- df[,c(-1,-5,-6,-8)] #delete the column 5 because of the bad fit
+df <- data.frame(df,datatest[,c(7:10,13)],suggestion=c(rep(0,nrow(datatest))))
+#df <- as.matrix(df)
+#df <- df[-which(apply(df,1,function(x)all(is.na(x)))),]
+#d <- data.frame()
+for (i in 1:nrow(df)){
+  title=c(1,2,3,6)
+  a <- df[i,which.max(df[i,1:4])]
+	flg=c(
+	  try(which(df[i,]==a),FALSE)
+	)
+	df$suggestion[i] <- title[flg]
+}
+#d <- df[,4:8]
+
+#write.xlsx(d,file = 'C:/Users/MI/Desktop/d41.xlsx')
+
+
+
 mydata <- subset(newdata,newdata[,8]+newdata[,9]+newdata[,10]+newdata[,11]+newdata[,12]+newdata[,13]+newdata[,14]+newdata[,15]+newdata[,16]+newdata[,17]+newdata[,18]+newdata[,19]+newdata[,20]+newdata[,21]+newdata[,22]+newdata[,23]+newdata[,24]+newdata[,25]==0) # no treatment people for a single plot
 a <- glm(Response.compare.to.previous.F.U ~ CREA,data = mydata,family = binomial)
 summary(a)
